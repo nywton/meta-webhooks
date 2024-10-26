@@ -1,32 +1,33 @@
-const express = require('express')
-  , bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
-app.get("/", function(request, response) {
-  response.send('Simple WhatsApp Webhook tester</br>There is no front-end, see server.js for implementation!');
+app.get('/', (req, res) => {
+  res.send('Simple WhatsApp Webhook tester</br>See server.js for implementation!');
 });
 
-app.get('/webhook', function(req, res) {
-  if (
-    req.query['hub.mode'] == 'subscribe' &&
-    req.query['hub.verify_token'] == 'token'
-  ) {
-    res.send(req.query['hub.challenge']);
+app.get('/webhook', (req, res) => {
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+
+  if (mode === 'subscribe' && token === 'token') {
+    res.send(challenge);
   } else {
-    res.sendStatus(400);
+    res.status(400).send('Invalid subscription request');
   }
 });
 
-app.post("/webhook", function(request, response) {
-  console.log(request.body);
-  console.log('Incoming webhook: ' + JSON.stringify(request.body));
-  response.sendStatus(200);
+app.post('/webhook', (req, res) => {
+  console.log('Incoming webhook:', req.body);
+  res.sendStatus(200);
 });
 
-const listener = app.listen('8000', function() {
-  console.log('Your app is listening on port ' + listener.address().port);
+const port = 8000;
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });
